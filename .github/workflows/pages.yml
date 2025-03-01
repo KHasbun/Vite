@@ -1,19 +1,19 @@
-name: CICD de vite MPA a Github Pages
-
+name: CICD de Vite MPA a Github Pages
 on:
   push:
     branches: ["main"]
   workflow_dispatch:
 permissions:
   contents: read
-  pages: write
+  pages: write #para desplegar
   id-token: write
-env:
-  DEPLOY_BASE_URL: ${{ vars.DEPLOY_BASE_URL}}
-concurrency:
+env: #variables de entorno, que ocupa la maquina que compila
+  DEPLOY_BASE_URL: ${{ vars.DEPLOY_BASE_URL }} #ese valor lo maneja github por seguridad
+concurrency: #ese script ¿cuantas veces se puede ejecutar?, compila de manera asincrona
   group: "pages"
   cancel-in-progress: true
 
+#configurar que debe hacer
 jobs:
   deploy:
     environment: #un espacio donde puede trabajar
@@ -22,10 +22,26 @@ jobs:
     runs-on: ubuntu-latest #definir en donde va a correr, busca la version mas pequeña de todas
     steps: #los pasos, nombre del paso y que es lo que hace
       - name: Clonar Repositorio
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4 #usar algo existente, es como el input, genera el token del github, clona el repo, y lo quita del repo para hacer modificaciones sin necesidad de volver a subir, no se cambia
       - name: Instalar Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
       - name: Instalar Dependencias
         run: npm install
+      #- name: pruebas unitarias QA
+      # run: npm run test
+      - name: Verificacion de Env
+        run: echo "DEPLOY_BASE_URL -> $DEPLOY_BASE_URL" #sintaxis que se corre directamente en el servidor
+      - name: Compilar el Sitio
+        run: npm run build #compilar
+      #configurar
+      - name: Configurar Entorno Github Pages
+        uses: actions/configure-pages@v5
+      - name: Upload del Sitio Compilado #ubirlo no quiere decir desplegar, subir es simplemente es guardarlo
+        uses: actions/upload-pages-artifact@v3 #subir en un archivo zip toda la carpeta del proyecto, actions es el usuario de microsoft dentro de github
+        with:
+          path: "./dist"
+      - name: Publicar el Sitio
+        id: deployment #define el id del deploy
+        uses: actions/deploy-pages@v4
