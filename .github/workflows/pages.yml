@@ -16,16 +16,16 @@ concurrency:
 
 jobs:
   deploy:
-    evironment:
-    name: github-pages
-    url: ${{ steps.github_pages.outputs.url}}
-  runs-on: ubuntu-latest
-  steps:
-    - name: Clonar Repositorio
-      uses: actions/checkout@v4
-    - name: Instalar Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: "20"
-    - name: Instalar Dependencias
-      run: npm install
+    environment: #un espacio donde puede trabajar
+      name: github-pages
+      url: ${{ steps.github-pages.outputs.url }} #referencia al deploy
+    runs-on: ubuntu-latest #definir en donde va a correr, busca la version mas pequeña de todas
+    steps: #los pasos, nombre del paso y que es lo que hace
+      - name: Clonar Repositorio
+        uses: actions/checkout@v4
+      - name: Instalar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Instalar Dependencias
+        run: npm install
